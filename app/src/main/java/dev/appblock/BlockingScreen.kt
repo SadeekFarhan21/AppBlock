@@ -147,6 +147,8 @@ fun BlockingScreen(onEditSchedule: (Schedule) -> Unit) {
         }
 
         QuickBlockCard()
+        Spacer(Modifier.height(16.dp))
+        ContentBlocksCard()
         Spacer(Modifier.height(24.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -325,6 +327,82 @@ private fun QuickBlockCard() {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ContentBlocksCard() {
+    var note by remember { mutableStateOf<String?>(null) }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text(
+                "Content Blocks",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "No-go zones inside apps you otherwise allow. Always on, day and night.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+            )
+            ContentBlockRow(
+                title = "YouTube Shorts",
+                subtitle = "The Shorts player in the app, and youtube.com/shorts on the web",
+                checked = BlockRepository.blockYtShorts,
+                onChange = { checked ->
+                    note = if (BlockRepository.setBlockYtShorts(checked)) null
+                    else "Strict Mode is on — content blocks can't be turned off."
+                }
+            )
+            ContentBlockRow(
+                title = "YouTube Music",
+                subtitle = "The YT Music app, and music.youtube.com on the web",
+                checked = BlockRepository.blockYtMusic,
+                onChange = { checked ->
+                    note = if (BlockRepository.setBlockYtMusic(checked)) null
+                    else "Strict Mode is on — content blocks can't be turned off."
+                }
+            )
+            note?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContentBlockRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onChange: (Boolean) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 6.dp)
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.width(12.dp))
+        Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 

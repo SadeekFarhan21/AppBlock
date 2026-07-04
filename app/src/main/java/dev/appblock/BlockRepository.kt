@@ -25,6 +25,9 @@ object BlockRepository {
     private const val KEY_ATTEMPTS_DAY = "attempts_day"
     private const val KEY_ATTEMPTS_DAY_COUNT = "attempts_day_count"
 
+    private const val KEY_BLOCK_YT_SHORTS = "block_yt_shorts"
+    private const val KEY_BLOCK_YT_MUSIC = "block_yt_music"
+
     // v1 storage (flat app/site sets) — migrated into an "Always On" schedule.
     private const val KEY_LEGACY_APPS = "blocked_apps"
     private const val KEY_LEGACY_SITES = "blocked_sites"
@@ -40,6 +43,10 @@ object BlockRepository {
     var blockedToday by mutableIntStateOf(0)
         private set
     var blockedTotal by mutableIntStateOf(0)
+        private set
+    var blockYtShorts by mutableStateOf(false)
+        private set
+    var blockYtMusic by mutableStateOf(false)
         private set
 
     val isStrict: Boolean get() = System.currentTimeMillis() < strictUntil
@@ -57,6 +64,23 @@ object BlockRepository {
         blockedToday = if (prefs.getLong(KEY_ATTEMPTS_DAY, 0L) == LocalDate.now().toEpochDay()) {
             prefs.getInt(KEY_ATTEMPTS_DAY_COUNT, 0)
         } else 0
+        blockYtShorts = prefs.getBoolean(KEY_BLOCK_YT_SHORTS, false)
+        blockYtMusic = prefs.getBoolean(KEY_BLOCK_YT_MUSIC, false)
+    }
+
+    /** Content blocks can always be turned on; turning OFF is refused under Strict Mode. */
+    fun setBlockYtShorts(value: Boolean): Boolean {
+        if (!value && isStrict) return false
+        blockYtShorts = value
+        prefs.edit().putBoolean(KEY_BLOCK_YT_SHORTS, value).apply()
+        return true
+    }
+
+    fun setBlockYtMusic(value: Boolean): Boolean {
+        if (!value && isStrict) return false
+        blockYtMusic = value
+        prefs.edit().putBoolean(KEY_BLOCK_YT_MUSIC, value).apply()
+        return true
     }
 
     private fun migrateLegacyLists() {

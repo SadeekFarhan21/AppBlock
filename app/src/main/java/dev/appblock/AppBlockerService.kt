@@ -28,6 +28,19 @@ class AppBlockerService : AccessibilityService() {
         )
 
         private const val BLOCK_COOLDOWN_MS = 1500L
+
+        private const val YOUTUBE = "com.google.android.youtube"
+        private const val YOUTUBE_MUSIC = "com.google.android.apps.youtube.music"
+
+        // View ids the YouTube app uses for the Shorts player; they vary by
+        // app version, so several candidates are checked.
+        private val SHORTS_PLAYER_IDS = listOf(
+            "reel_recycler",
+            "reel_watch_player",
+            "reel_player_page_container",
+            "shorts_video_container",
+            "reel_progress_bar",
+        )
     }
 
     private var lastBlockedKey: String? = null
@@ -47,17 +60,49 @@ class AppBlockerService : AccessibilityService() {
                 block(key = pkg, name = appLabel(pkg), reason = reason, isApp = true)
                 return
             }
+            if (pkg == YOUTUBE_MUSIC && BlockRepository.blockYtMusic) {
+                block(key = pkg, name = "YouTube Music", reason = "Content Blocks", isApp = true)
+                return
+            }
+        }
+
+        if (pkg == YOUTUBE && BlockRepository.blockYtShorts && isShortsPlayerVisible()) {
+            // Kick out of the Shorts player, then show the block screen.
+            performGlobalAction(GLOBAL_ACTION_BACK)
+            block(key = "yt-shorts", name = "YouTube Shorts", reason = "Content Blocks", isApp = true)
+            return
         }
 
         val urlBarId = BROWSER_URL_BAR_IDS[pkg] ?: return
         val url = readUrlBar(pkg, urlBarId) ?: return
-        val host = hostOf(url) ?: return
+        val host = hostOf(url)?.removePrefix("www.") ?: return
+
+        val contentReason = when {
+            BlockRepository.blockYtShorts &&
+                (host == "youtube.com" || host.endsWith(".youtube.com")) &&
+                pathOf(url).startsWith("/shorts") -> "YouTube Shorts"
+            BlockRepository.blockYtMusic && host == "music.youtube.com" -> "YouTube Music"
+            else -> null
+        }
+        if (contentReason != null) {
+            performGlobalAction(GLOBAL_ACTION_BACK)
+            block(key = contentReason, name = contentReason, reason = "Content Blocks", isApp = false)
+            return
+        }
+
         val reason = BlockRepository.blockReasonForSite(host) ?: return
 
         // Back out of the page first so dismissing the block screen
         // doesn't drop the user straight back onto the blocked site.
         performGlobalAction(GLOBAL_ACTION_BACK)
         block(key = host, name = host, reason = reason, isApp = false)
+    }
+
+    private fun isShortsPlayerVisible(): Boolean {
+        val root = rootInActiveWindow ?: return false
+        return SHORTS_PLAYER_IDS.any { id ->
+            root.findAccessibilityNodeInfosByViewId("$YOUTUBE:id/$id")?.isNotEmpty() == true
+        }
     }
 
     override fun onInterrupt() = Unit
@@ -102,6 +147,12 @@ class AppBlockerService : AccessibilityService() {
         val candidate = url.substringAfter("://").substringBefore('/').substringBefore(':')
         if (candidate.isEmpty() || candidate.contains(' ') || !candidate.contains('.')) return null
         return candidate
+    }
+
+    private fun pathOf(url: String): String {
+        val afterScheme = url.substringAfter("://")
+        val slash = afterScheme.indexOf('/')
+        return if (slash == -1) "/" else afterScheme.substring(slash).substringBefore('?')
     }
 
     private fun appLabel(pkg: String): String = try {
