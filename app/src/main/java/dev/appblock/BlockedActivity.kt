@@ -52,9 +52,16 @@ class BlockedActivity : ComponentActivity() {
         val reason = intent.getStringExtra(EXTRA_REASON) ?: ""
         val isApp = intent.getBooleanExtra(EXTRA_IS_APP, true)
 
-        // Back must not return to the blocked app/site.
+        // Back must not return to the blocked app/site. Also swallow back
+        // presses in the first moments: the service fires GLOBAL_ACTION_BACK
+        // to leave the blocked page, and that press can race in after this
+        // screen appears and dismiss it before the user ever sees it.
+        val shownAt = android.os.SystemClock.elapsedRealtime()
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = goHome()
+            override fun handleOnBackPressed() {
+                if (android.os.SystemClock.elapsedRealtime() - shownAt < 800) return
+                goHome()
+            }
         })
 
         setContent {
