@@ -117,10 +117,11 @@ fun StrictModeScreen() {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "While locked, you can't:\n· disable or edit schedules\n· delete schedules\n· stop Quick Block early",
+                "While locked, schedules can't be disabled, edited, or deleted, and Quick Block can't be stopped early.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
 

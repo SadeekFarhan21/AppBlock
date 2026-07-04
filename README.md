@@ -1,5 +1,7 @@
 # AppBlock
 
+[![Build](https://github.com/SadeekFarhan21/AppBlock/actions/workflows/build.yml/badge.svg)](https://github.com/SadeekFarhan21/AppBlock/actions/workflows/build.yml)
+
 A free, fully local Android app + website blocker. No accounts, no premium tier, no ads, no data collection — the whole APK is about 1 MB.
 
 ## Features
@@ -55,3 +57,7 @@ APK output: `app/build/outputs/apk/release/app-release.apk` (minified; debug-sig
 
 - Website blocking only covers the browsers listed in `AppBlockerService.kt`; block any other browser as an app instead. In-app WebViews aren't detected (that would need a local VPN service).
 - Strict Mode locks changes inside the app; turning off the accessibility service or uninstalling still bypasses it. This is a self-control tool, not parental control.
+
+## License
+
+[MIT](LICENSE)
