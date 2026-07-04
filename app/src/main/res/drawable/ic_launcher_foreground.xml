@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shield -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,26 L76,34 L76,52 C76,66 67,76 54,82 C41,76 32,66 32,52 L32,34 Z" />
+    <!-- Block bar -->
+    <path
+        android:fillColor="#0A0A0A"
+        android:pathData="M42,50 L66,50 L66,58 L42,58 Z" />
+</vector>

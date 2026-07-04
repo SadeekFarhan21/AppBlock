@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AppBlock</string>
+    <string name="accessibility_service_description">AppBlock uses this service to detect when a blocked app is opened or a blocked website is visited, so it can stop it. It does not collect or share any data.</string>
+</resources>
